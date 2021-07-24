@@ -1,0 +1,55 @@
+<html>
+  <head>
+<style>
+  .gol > div > div {
+    border: solid 1px black;
+    width: 2rem;
+    height: 2rem;
+  }
+  .gol > div {
+    display: flex;
+  }
+  .alive {
+    background-color: dodgerBlue;
+  }
+</style>
+  </head>
+  <body>
+    <div id='gol'></div>
+  <script>
+    class GOL{
+      constructor(el, rows, columns){
+        this.el = el;
+        this.rows = rows;
+        this.columns = columns;
+        this.el.classList.add('gol');
+      }
+      run(){
+        this.data = new Array(this.rows).fill('').map( row => {
+          return new Array(this.columns).fill('').map( cell => {
+            return !!Math.round(Math.random());
+          })
+        }); 
+        this.render();
+      }
+      render(){
+        const html = this.data.map( row => {
+          return `
+            <div>
+              ${ row.map( cell => {
+                return `
+                  <div ${ cell ? 'class=alive': ''}></div>
+                `;
+              }).join('')}
+            </div>
+          `;
+        }).join('');
+        this.el.innerHTML = html;
+      }
+    }
+    const el = document.querySelector('#gol');
+    const gol = new GOL(el, 10, 10);
+    gol.run();
+  </script>
+  </body>
+</html>
