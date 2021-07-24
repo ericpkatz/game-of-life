@@ -1,10 +1,13 @@
 <html>
   <head>
 <style>
+  .gol {
+    margin: 1rem;
+  }
   .gol > div > div {
     border: solid 1px black;
-    width: 2rem;
-    height: 2rem;
+    width: 0.5rem;
+    height: 0.5rem;
   }
   .gol > div {
     display: flex;
@@ -12,10 +15,15 @@
   .alive {
     background-color: dodgerBlue;
   }
+  ul {
+    display: flex;
+    flex-wrap: wrap;
+  }
 </style>
   </head>
   <body>
-    <div id='gol'></div>
+  <ul>
+  </ul>
   <script>
     class GOL{
       constructor(el, rows, columns){
@@ -23,6 +31,15 @@
         this.rows = rows;
         this.columns = columns;
         this.el.classList.add('gol');
+        this.el.addEventListener('click', ()=> {
+          if(this.interval){
+            clearInterval(this.interval);
+            this.interval = false;
+          }
+          else {
+            this.interval = setInterval(()=> this.tick(), 250);
+          }
+        });
       }
       run(){
         this.data = new Array(this.rows).fill('').map( row => {
@@ -30,6 +47,46 @@
             return !!Math.round(Math.random());
           })
         }); 
+        this.render();
+        this.interval = setInterval(()=> this.tick(), 250);
+      }
+      tick(){
+        const _data = new Array(this.rows).fill('').map( row => {
+          return new Array(this.columns).fill('').map( cell => {
+            return false;
+          })
+        }); 
+        this.data.forEach((row, i)=> {
+          row.forEach((cell, j)=> {
+            const livingNeighbors = [
+              [i - 1, j - 1],
+              [i - 1, j],
+              [i - 1, j + 1],
+              [i, j - 1],
+              [i, j + 1],
+              [i + 1, j - 1],
+              [i + 1, j],
+              [i + 1, j + 1],
+            ].reduce((acc, position)=> {
+              const [_i, _j] = position;
+              const _row = this.data[_i];
+              if(_row && _row[_j] === true){
+                acc++;
+              }
+              return acc;
+            }, 0);
+            let next = cell;
+            const alive = cell;
+            if(!alive && livingNeighbors === 3){
+              next = true;
+            }
+            if(alive && ![2, 3].includes(livingNeighbors)){
+              next = false;
+            }
+            _data[i][j] = next;
+          });
+        });
+        this.data = _data;
         this.render();
       }
       render(){
@@ -47,9 +104,13 @@
         this.el.innerHTML = html;
       }
     }
-    const el = document.querySelector('#gol');
-    const gol = new GOL(el, 10, 10);
-    gol.run();
+    const ul = document.querySelector('ul');
+    new Array(25).fill('').forEach( _ => {
+      const li = document.createElement('li');
+      ul.appendChild(li);
+      const gol = new GOL(li, 10, 10);
+      gol.run();
+    });
   </script>
   </body>
 </html>
